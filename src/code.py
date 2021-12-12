@@ -4,9 +4,12 @@
 import time
 from adafruit_magtag.magtag import MagTag
 from adafruit_magtag.graphics import Graphics
-import adafruit_scd4x
-
 import board
+# import alarm
+# from adafruit_progressbar.progressbar import HorizontalProgressBar
+
+
+import adafruit_scd4x
 import adafruit_ccs811
 import adafruit_bme680
 import adafruit_bme680
@@ -94,18 +97,37 @@ magtag.add_text(text_position=(3,65,),text_scale=2,) #  bme688 GAS
 magtag.add_text(text_position=(3,85,),text_scale=2,) #  bme688 GAS
 magtag.add_text(text_position=(3,105,),text_scale=2,) #  bme688 GAS
 
+magtag.add_text(text_position=(250,10,),text_scale=2,) #  Battery
+
+
+
+# # Create a new progress_bar object at (x, y)
+# progress_bar = HorizontalProgressBar(
+#     (200, 20),
+#     (30, 10),
+#     bar_color=0xFFFFFF,
+#     outline_color=0xAAAAAA,
+#     fill_color=0x777777,
+# )
+
+
+
+# set up pin alarms
+# pin_alarms = [alarm.pin.PinAlarm(pin=board.BUTTON_, value=False, pull=True)]
+
+magtag.peripherals.neopixel_disable = True
 
 
 while True:
-    for i, b in enumerate(magtag.peripherals.buttons):
-        if not b.value:
-            print("Button %c pressed" % chr((ord("A") + i)))
-            magtag.peripherals.neopixel_disable = False
-            magtag.peripherals.neopixels.fill(button_colors[i])
-            magtag.peripherals.play_tone(button_tones[i], 0.25)
-            break
-    else:
-        magtag.peripherals.neopixel_disable = True
+    # for i, b in enumerate(magtag.peripherals.buttons):
+    #     if not b.value:
+    #         print("Button %c pressed" % chr((ord("A") + i)))
+    #         magtag.peripherals.neopixel_disable = False
+    #         magtag.peripherals.neopixels.fill(button_colors[i])
+    #         magtag.peripherals.play_tone(button_tones[i], 0.25)
+    #         break
+    # else:
+    #   magtag.peripherals.neopixel_disable = True
     if(use_SCD41):
         if(BIG_PPM):
             magtag.set_text("%0.f°C" % scd4x.temperature, 0, auto_refresh=False)
@@ -134,7 +156,12 @@ while True:
         except RuntimeError:
             print("Unable to read from sensor, retrying...")
 
+    voltage = magtag.peripherals.battery
+    magtag.set_text("%f" % voltage, 6, auto_refresh=False)
     magtag.refresh()
     if(SLEEP):
+        if(use_SCD41):
+            scd4x.stop_periodic_measurement()
+        # alarm.exit_and_deep_sleep_until_alarms(*pin_alarms)
         magtag.exit_and_deep_sleep(10*60)  # 5 minutes
     time.sleep(5)
