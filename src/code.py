@@ -21,12 +21,14 @@ magtag = MagTag()
 button_colors = ((255, 0, 0), (255, 150, 0), (0, 255, 255), (180, 0, 255))
 button_tones = (1047, 1318, 1568, 2093)
 
-
+SLEEP = True
 use_ccs811 = False
-use_pm25 = True
+use_pm25 = False
 use_bme688 = False
 use_MICS6814 = False
-use_SCD41 = False
+use_SCD41 = True
+BIG_PPM = True
+
 
 if(use_ccs811):
     ccs811 = adafruit_ccs811.CCS811(i2c)
@@ -74,9 +76,20 @@ if(use_bme688):
     # print("Pressure: %0.3f hPa" % bme680.pressure)
     # print("Altitude = %0.2f meters" % bme680.altitude)
 
-magtag.add_text(text_position=(3,5,),text_scale=2,) #Temp
-magtag.add_text(text_position=(3,25,),text_scale=2,) #Hum
-magtag.add_text(text_position=(3,45,),text_scale=2,) # CO2
+if(BIG_PPM):
+    magtag.add_text(text_position=(3,90,),text_scale=3,
+    text_font="fonts/Arial-Bold-12.pcf",
+    ) #Temp
+    magtag.add_text(text_position=(190,90,),text_scale=3,
+    text_font="fonts/Arial-Bold-12.pcf",
+    ) #Hum
+    magtag.add_text(text_position=(3,30,),text_scale=4,
+    text_font="fonts/Arial-Bold-12.pcf",
+    ) # CO2
+else:
+    magtag.add_text(text_position=(3,5,),text_scale=2,) #Temp
+    magtag.add_text(text_position=(3,25,),text_scale=2,) #Hum
+    magtag.add_text(text_position=(3,45,),text_scale=2,) # CO2
 magtag.add_text(text_position=(3,65,),text_scale=2,) #  bme688 GAS 
 magtag.add_text(text_position=(3,85,),text_scale=2,) #  bme688 GAS
 magtag.add_text(text_position=(3,105,),text_scale=2,) #  bme688 GAS
@@ -94,9 +107,14 @@ while True:
     else:
         magtag.peripherals.neopixel_disable = True
     if(use_SCD41):
-        magtag.set_text("T %0.1f*C" % scd4x.temperature, 0, auto_refresh=False)
-        magtag.set_text("H %0.1f%%" % scd4x.relative_humidity, 1, auto_refresh=False)
-        magtag.set_text("CO2 %dppm" % scd4x.CO2, 2, auto_refresh=False)
+        if(BIG_PPM):
+            magtag.set_text("%0.f°C" % scd4x.temperature, 0, auto_refresh=False)
+            magtag.set_text("%0.f%%" % scd4x.relative_humidity, 1, auto_refresh=False)
+            magtag.set_text("%dppm" % scd4x.CO2, 2, auto_refresh=False)
+        else:
+            magtag.set_text("T %0.1f*C" % scd4x.temperature, 0, auto_refresh=False)
+            magtag.set_text("H %0.1f%%" % scd4x.relative_humidity, 1, auto_refresh=False)
+            magtag.set_text("CO2 %dppm" % scd4x.CO2, 2, auto_refresh=False)
     if(use_bme688):
         # magtag.set_text("T %0.1f*C" % float(bme680.temperature) + temperature_offset, 0, auto_refresh=False)
         magtag.set_text("GAS %dohm" % bme680.gas, 2, auto_refresh=False)
@@ -117,4 +135,6 @@ while True:
             print("Unable to read from sensor, retrying...")
 
     magtag.refresh()
+    if(SLEEP):
+        magtag.exit_and_deep_sleep(10*60)  # 5 minutes
     time.sleep(5)
