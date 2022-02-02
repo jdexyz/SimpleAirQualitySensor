@@ -11,12 +11,13 @@ import board
 
 import adafruit_scd4x
 import adafruit_ccs811
-import adafruit_bme680
-import adafruit_bme680
+# import adafruit_bme680
 from adafruit_pm25.i2c import PM25_I2C
+# from mics6814 import MICS6814
+# import busio
 
 i2c = board.I2C()  # uses board.SCL and board.SDA
-
+# i2c = busio.I2C(board.SCL, board.SDA)
 magtag = MagTag()
 
 
@@ -27,7 +28,7 @@ button_tones = (1047, 1318, 1568, 2093)
 SLEEP = True
 use_ccs811 = False
 use_pm25 = False
-use_bme688 = False
+# use_bme688 = False
 use_MICS6814 = False
 use_SCD41 = True
 BIG_PPM = True
@@ -65,19 +66,24 @@ if(use_SCD41):
     # magtag.set_text("Temperature: %0.1f *C" % scd4x.temperature)
     # magtag.set_text("Humidity: %0.1f %%" % scd4x.relative_humidity)
 
-if(use_bme688):
-    bme680 = adafruit_bme680.Adafruit_BME680_I2C(i2c, debug=False, address=0x76)
-    # change this to match the location's pressure (hPa) at sea level
-    bme680.sea_level_pressure = 1013.25
-    # You will usually have to add an offset to account for the temperature of
-    # the sensor. This is usually around 5 degrees but varies by use. Use a
-    # separate temperature sensor to calibrate this one.
-    temperature_offset = -5
-    # print("\nTemperature: %0.1f C" % (bme680.temperature + temperature_offset))
-    # print("Gas: %d ohm" % bme680.gas)
-    # print("Humidity: %0.1f %%" % bme680.relative_humidity)
-    # print("Pressure: %0.3f hPa" % bme680.pressure)
-    # print("Altitude = %0.2f meters" % bme680.altitude)
+# if(use_bme688):
+#     bme680 = adafruit_bme680.Adafruit_BME680_I2C(i2c, debug=False, address=0x76)
+#     # change this to match the location's pressure (hPa) at sea level
+#     bme680.sea_level_pressure = 1013.25
+#     # You will usually have to add an offset to account for the temperature of
+#     # the sensor. This is usually around 5 degrees but varies by use. Use a
+#     # separate temperature sensor to calibrate this one.
+#     temperature_offset = -5
+#     # print("\nTemperature: %0.1f C" % (bme680.temperature + temperature_offset))
+#     # print("Gas: %d ohm" % bme680.gas)
+#     # print("Humidity: %0.1f %%" % bme680.relative_humidity)
+#     # print("Pressure: %0.3f hPa" % bme680.pressure)
+#     # print("Altitude = %0.2f meters" % bme680.altitude)
+
+if use_MICS6814:
+    mics6814 = MICS6814(i2c)
+    mics6814.set_led(20,0,0)
+    mics6814.set_brightness(0.1)
 
 if(BIG_PPM):
     magtag.add_text(text_position=(3,90,),text_scale=3,
@@ -137,10 +143,10 @@ while True:
             magtag.set_text("T %0.1f*C" % scd4x.temperature, 0, auto_refresh=False)
             magtag.set_text("H %0.1f%%" % scd4x.relative_humidity, 1, auto_refresh=False)
             magtag.set_text("CO2 %dppm" % scd4x.CO2, 2, auto_refresh=False)
-    if(use_bme688):
-        # magtag.set_text("T %0.1f*C" % float(bme680.temperature) + temperature_offset, 0, auto_refresh=False)
-        magtag.set_text("GAS %dohm" % bme680.gas, 2, auto_refresh=False)
-        # print("\nTemperature: %0.1f C" % ())
+    # if(use_bme688):
+    #     # magtag.set_text("T %0.1f*C" % float(bme680.temperature) + temperature_offset, 0, auto_refresh=False)
+    #     magtag.set_text("GAS %dohm" % bme680.gas, 2, auto_refresh=False)
+    #     # print("\nTemperature: %0.1f C" % ())
     if(use_pm25):
         try:
             aqdata = pm25.read()
