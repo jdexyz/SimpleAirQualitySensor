@@ -5,7 +5,7 @@ import time
 from adafruit_magtag.magtag import MagTag
 from adafruit_magtag.graphics import Graphics
 import board
-# import alarm
+import alarm
 # from adafruit_progressbar.progressbar import HorizontalProgressBar
 
 
@@ -18,12 +18,9 @@ from adafruit_pm25.i2c import PM25_I2C
 
 i2c = board.I2C()  # uses board.SCL and board.SDA
 # i2c = busio.I2C(board.SCL, board.SDA)
+
 magtag = MagTag()
 
-
-
-button_colors = ((255, 0, 0), (255, 150, 0), (0, 255, 255), (180, 0, 255))
-button_tones = (1047, 1318, 1568, 2093)
 
 SLEEP = True
 use_ccs811 = False
@@ -84,6 +81,7 @@ if use_MICS6814:
     mics6814 = MICS6814(i2c)
     mics6814.set_led(20,0,0)
     mics6814.set_brightness(0.1)
+    print(mics6814.read_all())
 
 if(BIG_PPM):
     magtag.add_text(text_position=(3,90,),text_scale=3,
@@ -103,7 +101,7 @@ magtag.add_text(text_position=(3,65,),text_scale=2,) #  bme688 GAS
 magtag.add_text(text_position=(3,85,),text_scale=2,) #  bme688 GAS
 magtag.add_text(text_position=(3,105,),text_scale=2,) #  bme688 GAS
 
-magtag.add_text(text_position=(250,10,),text_scale=2,) #  Battery
+magtag.add_text(text_position=(225,10,),text_scale=2,) #  Battery
 
 
 
@@ -122,9 +120,12 @@ magtag.add_text(text_position=(250,10,),text_scale=2,) #  Battery
 # pin_alarms = [alarm.pin.PinAlarm(pin=board.BUTTON_, value=False, pull=True)]
 
 magtag.peripherals.neopixel_disable = True
-
+magtag.peripherals.buttons[0].deinit()
+a_alarm = alarm.pin.PinAlarm(pin=board.BUTTON_A, value=False, pull=True) #note pull
 
 while True:
+    if(magtag.peripherals.button_b_pressed):
+        SLEEP = not SLEEP
     # for i, b in enumerate(magtag.peripherals.buttons):
     #     if not b.value:
     #         print("Button %c pressed" % chr((ord("A") + i)))
@@ -163,11 +164,17 @@ while True:
             print("Unable to read from sensor, retrying...")
 
     voltage = magtag.peripherals.battery
-    magtag.set_text("%f" % voltage, 6, auto_refresh=False)
+    if(SLEEP):
+        magtag.set_text("S %f" % voltage, 6, auto_refresh=False)
+    else:
+        magtag.set_text("W %f" % voltage, 6, auto_refresh=False)
     magtag.refresh()
     if(SLEEP):
         if(use_SCD41):
             scd4x.stop_periodic_measurement()
         # alarm.exit_and_deep_sleep_until_alarms(*pin_alarms)
-        magtag.exit_and_deep_sleep(10*60)  # 5 minutes
-    time.sleep(5)
+        time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 600) # 600 seconds = 5 minutes
+        alarm.exit_and_deep_sleep_until_alarms(time_alarm, a_alarm)
+        # magtag.exit_and_deep_sleep(10*60)  # 5 minutes
+    else:
+        time.sleep(1)
