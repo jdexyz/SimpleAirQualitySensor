@@ -23,7 +23,7 @@ W = magtag.graphics.display.width
 H = magtag.graphics.display.height
 M = 3 # Margin
 
-SLEEP = False
+SLEEP = True
 use_pm25 = True
 use_MICS6814 = True
 use_SCD41 = True
@@ -130,9 +130,9 @@ magtag.add_text( ## humidity
 
 
 
-magtag.set_text("%d" % scd4x.CO2, 2, auto_refresh=False)
-magtag.set_text("%0.f°C" % scd4x.temperature, 3, auto_refresh=False)
-magtag.set_text("%0.f%%" % scd4x.relative_humidity, 4, auto_refresh=False)
+# magtag.set_text("%d" % scd4x.CO2, 2, auto_refresh=False)
+# magtag.set_text("%0.f°C" % scd4x.temperature, 3, auto_refresh=False)
+# magtag.set_text("%0.f%%" % scd4x.relative_humidity, 4, auto_refresh=False)
 
 
 # aqdata = pm25.read()
@@ -148,51 +148,26 @@ magtag.set_text("%0.f%%" % scd4x.relative_humidity, 4, auto_refresh=False)
 
 # magtag.add_text(text_position=(225,10,),text_scale=2,) #  Battery
 
-magtag.refresh()
-while True:
-    pass
-
-
-# magtag.peripherals.neopixel_disable = True
-# magtag.peripherals.buttons[0].deinit()
-# a_alarm = alarm.pin.PinAlarm(pin=board.BUTTON_A, value=False, pull=True) #note pull
-
+# magtag.refresh()
 # while True:
-#     if(magtag.peripherals.button_b_pressed):
-#         SLEEP = not SLEEP
-#     if(use_SCD41):
-#         if(BIG_PPM):
-#             magtag.set_text("%0.f°C" % scd4x.temperature, 0, auto_refresh=False)
-#             magtag.set_text("%0.f%%" % scd4x.relative_humidity, 1, auto_refresh=False)
-#             magtag.set_text("%dppm" % scd4x.CO2, 2, auto_refresh=False)
-#     if(use_pm25):
-#         try:
-#             aqdata = pm25.read()
-#             magtag.set_text(
-#                 "PM1.0 %d" % (aqdata["pm10 standard"]),
-#                  2, auto_refresh=False)
-#             magtag.set_text(
-#                 "PM2.5 %d" % (aqdata["pm25 standard"]),
-#                  3, auto_refresh=False)
-#             magtag.set_text(
-#                 "PM10 %d" % (aqdata["pm100 standard"]),
-#                  4, auto_refresh=False)
-#         except RuntimeError:
-#             print("Unable to read from sensor, retrying...")
+#     pass
 
-#     voltage = magtag.peripherals.battery
-#     if(SLEEP):
-#         magtag.set_text("S %f" % voltage, 6, auto_refresh=False)
-#     else:
-#         magtag.set_text("W %f" % voltage, 6, auto_refresh=False)
-#     magtag.refresh()
-#     if(SLEEP):
-#         if(use_SCD41):
-#             scd4x.stop_periodic_measurement()
-#         # alarm.exit_and_deep_sleep_until_alarms(*pin_alarms)
-#         time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 600) # 600 seconds = 5 minutes
-#         alarm.exit_and_deep_sleep_until_alarms(time_alarm, a_alarm)
-#         # magtag.exit_and_deep_sleep(10*60)  # 5 minutes
-#     else:
-#         # time.sleep(1)
-#         time.sleep(5)
+
+magtag.peripherals.neopixel_disable = True
+magtag.peripherals.buttons[0].deinit()
+a_alarm = alarm.pin.PinAlarm(pin=board.BUTTON_A, value=False, pull=True) #note pull
+
+while True:
+    if(magtag.peripherals.button_b_pressed):
+        SLEEP = not SLEEP
+    magtag.set_text("%d" % scd4x.CO2, 2, auto_refresh=False)
+    magtag.set_text("%0.f°C" % scd4x.temperature, 3, auto_refresh=False)
+    magtag.set_text("%0.f%%" % scd4x.relative_humidity, 4, auto_refresh=False)
+    progress_bar.progress = 100*(magtag.peripherals.battery-3.6)/(4.1-3.6)
+    magtag.refresh()
+    if(SLEEP):
+        scd4x.stop_periodic_measurement()
+        time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 600) # 600 seconds = 5 minutes
+        alarm.exit_and_deep_sleep_until_alarms(time_alarm, a_alarm)
+    else:
+        time.sleep(1)
