@@ -64,7 +64,7 @@ progress_bar = HorizontalProgressBar(
     bar_color=0x777777,
 )
 magtag.graphics.splash.append(progress_bar)
-progress_bar.progress = 100*(magtag.peripherals.battery-3.6)/(4.1-3.6)
+progress_bar.progress = 100*(magtag.peripherals.battery-3.6)/(4.23-3.6)
 
 magtag.add_text( ## "CO2"
         text_position=(M,M,),
@@ -163,7 +163,7 @@ while True:
     magtag.set_text("%d" % scd4x.CO2, 2, auto_refresh=False)
     magtag.set_text("%0.f°C" % scd4x.temperature, 3, auto_refresh=False)
     magtag.set_text("%0.f%%" % scd4x.relative_humidity, 4, auto_refresh=False)
-    progress_bar.progress = 100*(magtag.peripherals.battery-3.6)/(4.1-3.6)
+    progress_bar.progress = 100*(magtag.peripherals.battery-3.6)/(4.23-3.6)
     magtag.refresh()
     if(SLEEP):
         scd4x.stop_periodic_measurement()
