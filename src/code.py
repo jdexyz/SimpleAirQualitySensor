@@ -18,6 +18,11 @@ BIG_STYLE = dict(
             text_scale=1,
             text_font="fonts/FuturaBT-Heavy-48.bdf")
 
+MEDIUM_STYLE = dict(
+            text_scale=1,
+            text_font="fonts/FuturaBT-Medium-24.bdf")
+
+
 SMALL_STYLE = dict(
             text_scale=1,
             text_font="fonts/FuturaBT-Medium-18.bdf")
@@ -28,7 +33,7 @@ H = magtag.graphics.display.height
 M = 3 # Margin
 
 SLEEP = True
-
+TEMP_HUMIDITY_SINGLE_LINE = True
 
 print(sensors.enabled_sensors)
 
@@ -56,9 +61,15 @@ texts = dict()
 index = 0
 current_position = 0
 small_font_height = 16
+medium_font_height = 25
 big_font_height = 44
 
-def add_text(name, text_position, text_scale, text_font, text_anchor_point):
+
+def set_text(name, text, auto_refresh=False):
+    magtag.set_text(text, texts[name], auto_refresh)
+    
+
+def add_text(name, text_position, text_scale, text_font, text_anchor_point, initial_text = None):
     global index
     global texts
     texts[name] = index
@@ -69,10 +80,9 @@ def add_text(name, text_position, text_scale, text_font, text_anchor_point):
             text_font=text_font,
             text_anchor_point=text_anchor_point
     )
+    if(initial_text is not None):
+        set_text(name, initial_text, auto_refresh=False)
 
-def set_text(name, text, auto_refresh=False):
-    magtag.set_text(text, texts[name], auto_refresh)
-    
 
 current_position = M
 
@@ -81,17 +91,17 @@ if(sensors.enabled_sensors['SCD41']):
             "CO2_title",
             text_position=(M,current_position,),
             text_anchor_point=(0, 0),  # top left,
+            initial_text="CO2",
             **SMALL_STYLE
     )
-    set_text(name = "CO2_title", text = "CO2", auto_refresh=False)
 
     add_text( 
             "ppm_title",
             text_position=(W - M, current_position,),
             text_anchor_point=(1, 0),  # top right,
+            initial_text="ppm",
             **SMALL_STYLE
     )
-    set_text(name = "ppm_title", text="ppm", auto_refresh=False)
 
     current_position += small_font_height
 
@@ -104,70 +114,106 @@ if(sensors.enabled_sensors['SCD41']):
 
     current_position += big_font_height
 
-    add_text( 
-            "temp_title",
-            text_position=(M,current_position,),
-            text_anchor_point=(0, 0),  # top left,
-            **SMALL_STYLE
-    )
-    set_text(name = "temp_title", text = "Temperature", auto_refresh=False)
+    if TEMP_HUMIDITY_SINGLE_LINE:
 
-    current_position += small_font_height
+        add_text( 
+                "temp_title",
+                text_position=(M,current_position,),
+                text_anchor_point=(0, 0),  # top left,
+                initial_text="Temp",
+                **SMALL_STYLE
+        )
 
-    add_text(
-        "Temp_value",
-            text_position=(W - M, current_position,),
-            text_anchor_point=(1, 0),  # top left
-            **BIG_STYLE
-    )
+        add_text( 
+                "hum_title",
+                text_position=(W - M, current_position,),
+                text_anchor_point=(1, 0),  # top right,
+                initial_text="Hum",
+                **SMALL_STYLE
+        )
 
-    current_position += big_font_height
+        current_position += small_font_height
 
-    add_text( 
-            "hum_title",
-            text_position=(M,current_position,),
-            text_anchor_point=(0, 0),  # top left,
-            **SMALL_STYLE
-    )
-    set_text(name = "hum_title", text = "Rel. Humidity", auto_refresh=False)
+        add_text(
+            "Temp_value",
+                text_position=(M, current_position,),
+                text_anchor_point=(0, 0),  # top left
+                **MEDIUM_STYLE
+        )
 
-    current_position += small_font_height
+        add_text(
+            "humidity_value",
+                text_position=(W - M,current_position,),
+                text_anchor_point=(1, 0),  # top right
+                **MEDIUM_STYLE
+        )
+        current_position += medium_font_height
+    else:
+        add_text( 
+                "temp_title",
+                text_position=(M,current_position,),
+                text_anchor_point=(0, 0),  # top left,
+                initial_text="Temperature",
+                **SMALL_STYLE
+        )
+        current_position += small_font_height
 
-    add_text(
-        "humidity_value",
-            text_position=(W - M,current_position,),
-            text_anchor_point=(1, 0),  # top left
-            **BIG_STYLE
-    )
+        add_text(
+            "Temp_value",
+                text_position=(W - M, current_position,),
+                text_anchor_point=(1, 0),  # top right
+                **BIG_STYLE
+        )
+        current_position += big_font_height
 
-    current_position += big_font_height
+        add_text( 
+                "hum_title",
+                text_position=(M, current_position,),
+                text_anchor_point=(0, 0),  # top right,
+                initial_text = u"Rel.\xa0Hum",
+                **SMALL_STYLE
+        )
 
-if(sensors.enabled_sensors['CCS811']):
+        current_position += small_font_height
+
+        add_text(
+            "humidity_value",
+                text_position=(W - M,current_position,),
+                text_anchor_point=(1, 0),  # top right
+                **BIG_STYLE
+        )
+        current_position += big_font_height
+
+
+
+if(sensors.enabled_sensors['CCS811'] or True):
     add_text( 
             "VOC_title",
             text_position=(M,current_position,),
             text_anchor_point=(0, 0),  # top left,
+            initial_text="TVOC",
             **SMALL_STYLE
     )
-    set_text(name = "VOC_title", text="VOC", auto_refresh=False)
 
-    add_text(  
-            "ppb_title",
-            text_position=(W - M, current_position,),
-            text_anchor_point=(1, 0),  # top right,
+    add_text( 
+            "ppb_title2",
+            text_position=(W-M,current_position,),
+            text_anchor_point=(1, 0),  # top left,
+            initial_text="ppb",
             **SMALL_STYLE
     )
-    set_text(name = "ppb_title", text="pbb", auto_refresh=False)
 
     current_position += small_font_height
 
-
-    add_text( 
-            "VOC_value",
-            text_position=(W - M,current_position,),
-            text_anchor_point=(1, 0),  # top right
-            **BIG_STYLE
+    add_text(
+        "TVOC_Value",
+            text_position=(M, current_position,),
+            text_anchor_point=(0, 0),  # top left
+            **MEDIUM_STYLE
     )
+
+    current_position += medium_font_height
+
 
 
 if(sensors.enabled_sensors['PM25']):
@@ -230,7 +276,8 @@ while True:
         set_text(name = "Temp_value", text= "%0.f°C" % sensors.readings['temperature'], auto_refresh=False)
         set_text(name = "humidity_value", text= "%0.f%%" % sensors.readings['relative_humidity'], auto_refresh=False)
     if(sensors.enabled_sensors['CCS811']):
-        set_text(name = "VOC_value", text= "%d" % sensors.readings['TVOC'], auto_refresh=False)
+        set_text(name = "TVOC_Value", text= "%d" % sensors.readings['TVOC'], auto_refresh=False)
+        set_text(name = "eCO2_Value", text= "%d" % sensors.readings['eCO2'], auto_refresh=False)
     progress_bar.progress = get_battery_progress()
     try:
         internet.connect_to_internet()
