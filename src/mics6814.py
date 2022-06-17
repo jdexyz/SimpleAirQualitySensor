@@ -1,5 +1,3 @@
-# Should read https://github.com/eNBeWe/MiCS6814-I2C-Library/
-
 #https://gitlab.com/DanNduati/MICS6814-Micropython-driver/
 import ioexpander as io
 

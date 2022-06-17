@@ -2,9 +2,9 @@
 # If you put them in the code you risk committing that info or sharing it
 
 secrets = {
-    'ssid' : 'home_wifi_network',
-    'password' : 'wifi_password',
-    'aio_username' : 'my_adafruit_io_username',
-    'aio_key' : 'my_adafruit_io_key',
-    'timezone' : "America/New_York", # http://worldtimeapi.org/timezones
+    'ssid' : 'SFR-66e0',
+    'password' : 'train-appartement-cuisine-tapis',
+    'aio_username' : 'jdexyz',
+    'aio_key' : 'aio_nRRA45VJHFbQ4bNrKMf1qfmO8E1e',
+    'timezone' : "Europe/Paris", # http://worldtimeapi.org/timezones
     }

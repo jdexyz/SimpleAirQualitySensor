@@ -4,13 +4,24 @@ from adafruit_magtag.graphics import Graphics
 from adafruit_progressbar.progressbar import HorizontalProgressBar
 import board
 import alarm
-
+import internet
 import sensors
+
+
 
 
 sensors.init_connected_sensors()
 
 magtag = MagTag(rotation=0)
+
+BIG_STYLE = dict(
+            text_scale=1,
+            text_font="fonts/FuturaBT-Heavy-48.bdf")
+
+SMALL_STYLE = dict(
+            text_scale=1,
+            text_font="fonts/FuturaBT-Medium-18.bdf")
+
 
 W = magtag.graphics.display.width
 H = magtag.graphics.display.height
@@ -44,7 +55,7 @@ progress_bar.progress = get_battery_progress()
 texts = dict()
 index = 0
 current_position = 0
-small_font_height = 13
+small_font_height = 16
 big_font_height = 44
 
 def add_text(name, text_position, text_scale, text_font, text_anchor_point):
@@ -69,18 +80,16 @@ if(sensors.enabled_sensors['SCD41']):
     add_text( 
             "CO2_title",
             text_position=(M,current_position,),
-            text_scale=1,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(0, 0),  # top left,
+            **SMALL_STYLE
     )
     set_text(name = "CO2_title", text = "CO2", auto_refresh=False)
 
     add_text( 
             "ppm_title",
             text_position=(W - M, current_position,),
-            text_scale=1,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(1, 0),  # top right,
+            **SMALL_STYLE
     )
     set_text(name = "ppm_title", text="ppm", auto_refresh=False)
 
@@ -89,29 +98,46 @@ if(sensors.enabled_sensors['SCD41']):
     add_text(
             "CO2_value",
             text_position=(W - M,current_position,),
-            text_scale=3,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(1, 0),  # top right
+            **BIG_STYLE
     )
 
     current_position += big_font_height
+
+    add_text( 
+            "temp_title",
+            text_position=(M,current_position,),
+            text_anchor_point=(0, 0),  # top left,
+            **SMALL_STYLE
+    )
+    set_text(name = "temp_title", text = "Temperature", auto_refresh=False)
+
+    current_position += small_font_height
 
     add_text(
         "Temp_value",
             text_position=(W - M, current_position,),
-            text_scale=3,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(1, 0),  # top left
+            **BIG_STYLE
     )
 
     current_position += big_font_height
 
+    add_text( 
+            "hum_title",
+            text_position=(M,current_position,),
+            text_anchor_point=(0, 0),  # top left,
+            **SMALL_STYLE
+    )
+    set_text(name = "hum_title", text = "Rel. Humidity", auto_refresh=False)
+
+    current_position += small_font_height
+
     add_text(
         "humidity_value",
             text_position=(W - M,current_position,),
-            text_scale=3,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(1, 0),  # top left
+            **BIG_STYLE
     )
 
     current_position += big_font_height
@@ -120,18 +146,16 @@ if(sensors.enabled_sensors['CCS811']):
     add_text( 
             "VOC_title",
             text_position=(M,current_position,),
-            text_scale=1,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(0, 0),  # top left,
+            **SMALL_STYLE
     )
     set_text(name = "VOC_title", text="VOC", auto_refresh=False)
 
     add_text(  
             "ppb_title",
             text_position=(W - M, current_position,),
-            text_scale=1,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(1, 0),  # top right,
+            **SMALL_STYLE
     )
     set_text(name = "ppb_title", text="pbb", auto_refresh=False)
 
@@ -141,35 +165,42 @@ if(sensors.enabled_sensors['CCS811']):
     add_text( 
             "VOC_value",
             text_position=(W - M,current_position,),
-            text_scale=3,
-            text_font="fonts/Arial-Bold-12.pcf",
             text_anchor_point=(1, 0),  # top right
+            **BIG_STYLE
     )
 
 
+if(sensors.enabled_sensors['PM25']):
+    magtag.add_text( ## "PM1.0"
+            text_position=(5,140,),
+            text_anchor_point=(0, 0),  # top left,
+            **SMALL_STYLE
+    )
+    magtag.set_text("PM1.0", 5, auto_refresh=False)
 
-# magtag.add_text( ## "PM1.0"
-#         text_position=(5,140,),
-#         text_scale=1,
-#         text_font="fonts/Arial-Bold-12.pcf",
-#         text_anchor_point=(0, 0),  # top left,
-# )
-# magtag.set_text("PM1.0", 5, auto_refresh=False)
+    magtag.add_text( ## "ppm"
+            text_position=(125,140,),
+            text_anchor_point=(1, 0),  # top right,
+            **SMALL_STYLE
+    )
+    magtag.set_text("ppm", 6, auto_refresh=False)
 
-# magtag.add_text( ## "ppm"
-#         text_position=(125,140,),
-#         text_scale=1,
-#         text_font="fonts/Arial-Bold-12.pcf",
-#         text_anchor_point=(1, 0),  # top right,
-# )
-# magtag.set_text("ppm", 6, auto_refresh=False)
-
-# magtag.add_text( ## PM1.0 value
-#         text_position=(125,155,),
-#         text_scale=2,
-#         text_font="fonts/Arial-Bold-12.pcf",
-#         text_anchor_point=(1, 0),  # top right
-# )
+    magtag.add_text( ## PM1.0 value
+            text_position=(125,155,),
+            text_anchor_point=(1, 0),  # top right
+            **BIG_STYLE
+    )
+        
+    # aqdata = pm25.read()
+    # magtag.set_text(
+    #     "%d" % (aqdata["pm10 standard"]),
+    #      7, auto_refresh=False)
+    # magtag.set_text(
+    #     "%d" % (aqdata["pm25 standard"]),
+    #      3, auto_refresh=False)
+    # magtag.set_text(
+    #     "%d" % (aqdata["pm100 standard"]),
+    #      4, auto_refresh=False)
 
 
 
@@ -178,17 +209,6 @@ if(sensors.enabled_sensors['CCS811']):
 # magtag.set_text("%0.f°C" % scd4x.temperature, 3, auto_refresh=False)
 # magtag.set_text("%0.f%%" % scd4x.relative_humidity, 4, auto_refresh=False)
 
-
-# aqdata = pm25.read()
-# magtag.set_text(
-#     "%d" % (aqdata["pm10 standard"]),
-#      7, auto_refresh=False)
-# magtag.set_text(
-#     "%d" % (aqdata["pm25 standard"]),
-#      3, auto_refresh=False)
-# magtag.set_text(
-#     "%d" % (aqdata["pm100 standard"]),
-#      4, auto_refresh=False)
 
 # magtag.add_text(text_position=(225,10,),text_scale=2,) #  Battery
 
@@ -212,6 +232,11 @@ while True:
     if(sensors.enabled_sensors['CCS811']):
         set_text(name = "VOC_value", text= "%d" % sensors.readings['TVOC'], auto_refresh=False)
     progress_bar.progress = get_battery_progress()
+    try:
+        internet.connect_to_internet()
+        internet.send_battery_level(magtag.peripherals.battery)
+    except Exception:
+        print('Could not send battery level')
     magtag.refresh()
     if(SLEEP):
         sensors.put_sensors_to_sleep()
