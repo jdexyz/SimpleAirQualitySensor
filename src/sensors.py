@@ -17,8 +17,12 @@ ccs811 = None
 
 CCS811_LOW_POWER_MODE = None
 
-i2cSwitch.powerOff()
-
+enabled_sensors = dict(
+		PM25 = False,
+		SCD41 = False,
+		MICS6814 = False,
+		CCS811 = False,
+	)
 # print(i2cSwitch.read(0))
 
 def init_sensor(sensor):
@@ -34,9 +38,11 @@ def init_sensor(sensor):
 		aqdata = pm25.read()
 		while aqdata is None:
 			try:
-				pm25.read()
+				aqdata = pm25.read()
 			except RuntimeError:
+				print('loading')
 				time.sleep(0.1)
+		# print('aqdata', aqdata)
 	elif(sensor == 'SCD41'):
 		import adafruit_scd4x
 		scd4x = adafruit_scd4x.SCD4X(i2c)
@@ -74,7 +80,37 @@ def refresh_readings():
 	if enabled_sensors['CCS811']:
 		readings['TVOC'] = ccs811.tvoc
 		readings['eCO2'] = ccs811.eco2
+	if enabled_sensors['PM25']:
+		try:
+			aqdata = pm25.read()
+			readings['pm10 env'] = aqdata['pm10 env']
+			readings['pm25 env'] = aqdata['pm25 env']
+			readings['pm100 env'] = aqdata['pm100 env']
+			readings['pm10 standard'] = aqdata['pm10 standard']
+			readings['pm25 standard'] = aqdata['pm25 standard']
+			readings['pm100 standard'] = aqdata['pm100 standard']
+			readings['particles 03um'] = aqdata['particles 03um']
+			readings['particles 05um'] = aqdata['particles 05um']
+			readings['particles 10um'] = aqdata['particles 10um']
+			readings['particles 25um'] = aqdata['particles 25um']
+			readings['particles 50um'] = aqdata['particles 50um']
+			readings['particles 100um'] = aqdata['particles 100um']
+		except RuntimeError:
+			readings['pm10 env'] = -1
+			readings['pm25 env'] = -1
+			readings['pm100 env'] = -1
+			readings['pm10 standard'] = -1
+			readings['pm25 standard'] = -1
+			readings['pm100 standard'] = -1
+			readings['particles 03um'] = -1
+			readings['particles 05um'] = -1
+			readings['particles 10um'] = -1
+			readings['particles 25um'] = -1
+			readings['particles 50um'] = -1
+			readings['particles 100um'] = -1
+
 	return readings
+
 
 
 def put_sensors_to_sleep():
@@ -88,22 +124,50 @@ def put_sensors_to_sleep():
 		ccs811.drive_mode = CCS811_LOW_POWER_MODE
 	i2cSwitch.powerOff()
 
-while not i2c.try_lock():
-	time.sleep(0.1)
 
-addresses = i2c.scan()
-i2c.unlock()
+def get_connected_sensors():
+	global enabled_sensors
+	while not i2c.try_lock():
+		time.sleep(0.1)
 
-print("Detected i2C addresses", addresses)
+	addresses = i2c.scan()
+	i2c.unlock()
 
-enabled_sensors = dict(
-	PM25 = 0x12 in addresses,
-	SCD41 = 0x62 in addresses,
-	MICS6814 = 0x19 in addresses and False,
-	CCS811 = 0x5a in addresses,
-)
+	print("Detected i2C addresses", [hex(a) for a in addresses])
+
+	print('''
+
+	# 	PM25 = 0x12 = 18
+	# 	SCD41 = 0x62 = 98
+	# 	MICS6814 = 0x19 = 25
+	# 	CCS811 = 0x5a = 90
+	#  	Switch = 0x41 = 65
+	#	Accelero = 0x19 = 25
+		''')
+
+	# enabled_sensors = dict(
+	# 	PM25 = False,
+	# 	SCD41 = True,
+	# 	MICS6814 = False,
+	# 	CCS811 = False,
+	# )
+	enabled_sensors = dict(
+		PM25 = 0x12 in addresses,
+		SCD41 = 0x62 in addresses,
+		MICS6814 = False,#0x19 in addresses and 0x12 in addresses,
+		CCS811 = 0x5a in addresses,
+	)
+	print(enabled_sensors)
+
 
 def init_connected_sensors():
+	i2cSwitch.powerOff()
+	time.sleep(0.1)
+	i2cSwitch.powerOn()
+	time.sleep(3)
+	get_connected_sensors()
+
+
 	if(enabled_sensors['PM25']):
 		init_sensor('PM25')
 	if(enabled_sensors['SCD41']):
