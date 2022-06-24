@@ -1858,7 +1858,7 @@
     (property "Reference" "U1" (id 0) (at 212.8394 92.71 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "ADS1115" (id 1) (at 212.8394 95.25 0)
+    (property "Value" "" (id 1) (at 212.8394 95.25 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "" (id 2) (at 210.82 120.65 0)
@@ -2961,7 +2961,7 @@
       (reference "R8") (unit 1) (value "10k") (footprint "Sparkfun-Resistors:0805")
     )
     (path "/0f0f7bb5-ade7-4a81-82b4-43be6a8ad05c"
-      (reference "U1") (unit 1) (value "ADS1115") (footprint "Package_SO:TSSOP-10_3x3mm_P0.5mm")
+      (reference "U1") (unit 1) (value "ADS1115") (footprint "Package_SO:MSOP-10_3x3mm_P0.5mm")
     )
     (path "/34f2ec27-e80b-49eb-847f-cbca36bc7f20"
       (reference "U2") (unit 1) (value "74HC1G04") (footprint "Sparkfun-Silicon-Standard:SOT353")

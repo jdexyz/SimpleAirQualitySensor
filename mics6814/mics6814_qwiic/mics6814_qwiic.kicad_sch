@@ -2645,7 +2645,7 @@
   (symbol (lib_id "SparkFun-Resistors:RESISTOR1206") (at 68.58 151.13 270) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid c3e83e7a-dcca-4a71-85b4-e5cd4b823a7d)
-    (property "Reference" "R?" (id 0) (at 71.12 148.59 90)
+    (property "Reference" "R8" (id 0) (at 71.12 148.59 90)
       (effects (font (size 1.143 1.143)) (justify left))
     )
     (property "Value" "10k" (id 1) (at 71.12 151.13 90)
@@ -2958,7 +2958,7 @@
       (reference "R7") (unit 1) (value "10k") (footprint "Sparkfun-Resistors:0805")
     )
     (path "/c3e83e7a-dcca-4a71-85b4-e5cd4b823a7d"
-      (reference "R?") (unit 1) (value "10k") (footprint "Sparkfun-Resistors:0805")
+      (reference "R8") (unit 1) (value "10k") (footprint "Sparkfun-Resistors:0805")
     )
     (path "/0f0f7bb5-ade7-4a81-82b4-43be6a8ad05c"
       (reference "U1") (unit 1) (value "ADS1115") (footprint "Package_SO:TSSOP-10_3x3mm_P0.5mm")
